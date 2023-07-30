@@ -76,7 +76,8 @@ struct WeatherEmptyView: View {
             .padding(.top, getRelativeHeight(30.0))
             .padding(.bottom, getRelativeHeight(10.0))
         }
-        .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+        .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height,
+               alignment: .top)
         .background(ColorConstants.WhiteA700)
         .ignoresSafeArea()
         .hideNavigationBar()

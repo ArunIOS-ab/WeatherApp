@@ -15,6 +15,7 @@ public typealias FailureMessage = String
 public class APIManager {
     // A Singleton instance
     public static let shared = APIManager()
+    
 
     ///   - serverURL:        Optional value for pass your root url.
     ///   - strURL:                         String URL value.

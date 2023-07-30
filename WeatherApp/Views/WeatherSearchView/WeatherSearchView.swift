@@ -24,7 +24,7 @@ struct WeatherSearchView: View {
                             .padding(.trailing)
                     }
                     .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(50.0),
-                           alignment: .trailing)
+                           alignment: .leading)
                     .padding(.leading, getRelativeWidth(10.0))
                     VStack {
                         HStack {
@@ -62,7 +62,7 @@ struct WeatherSearchView: View {
                         .padding(.trailing, getRelativeWidth(16.0))
                     }
                     .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(39.0),
-                           alignment: .trailing)
+                           alignment: .leading)
                     .padding(.top, getRelativeHeight(29.0))
                     .padding(.leading, getRelativeWidth(10.0))
                     VStack(alignment: .leading, spacing: 0) {
@@ -97,133 +97,32 @@ struct WeatherSearchView: View {
                                    alignment: .topLeading)
                             .padding(.top, getRelativeHeight(30.0))
                             .padding(.trailing, getRelativeWidth(10.0))
+                        
+                        VStack(alignment: .trailing, spacing: 0) {
+                            Divider()
+                                .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(1.0),
+                                       alignment: .trailing)
+                                .background(ColorConstants.Gray200)
+                        }
+                        .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(1.0),
+                               alignment: .leading)
+                        .padding(.top, getRelativeHeight(13.0))
+                        .padding(.leading, getRelativeWidth(10.0))
+                        
                     }
                     .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(74.0),
-                           alignment: .trailing)
+                           alignment: .leading)
                     .padding(.top, getRelativeHeight(23.0))
-                    .padding(.leading, getRelativeWidth(10.0))
-                    VStack(alignment: .trailing, spacing: 0) {
-                        Divider()
-                            .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(1.0),
-                                   alignment: .trailing)
-                            .background(ColorConstants.Gray200)
-                    }
-                    .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(1.0),
-                           alignment: .trailing)
-                    .padding(.top, getRelativeHeight(13.0))
-                    .padding(.leading, getRelativeWidth(10.0))
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text(StringConstants.kMsgSalemOregon)
-                            .font(FontScheme.kAvenirRoman(size: getRelativeHeight(16.0)))
-                            .fontWeight(.regular)
-                            .foregroundColor(ColorConstants.Black900)
-                            .minimumScaleFactor(0.5)
-                            .multilineTextAlignment(.leading)
-                            .frame(width: getRelativeWidth(296.0), height: getRelativeHeight(22.0),
-                                   alignment: .topLeading)
-                            .padding(.trailing)
-                    }
-                    .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(22.0),
-                           alignment: .trailing)
-                    .padding(.top, getRelativeHeight(15.0))
-                    .padding(.leading, getRelativeWidth(10.0))
-                    VStack(alignment: .trailing, spacing: 0) {
-                        Divider()
-                            .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(1.0),
-                                   alignment: .trailing)
-                            .background(ColorConstants.Gray200)
-                    }
-                    .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(1.0),
-                           alignment: .trailing)
-                    .padding(.top, getRelativeHeight(13.0))
-                    .padding(.leading, getRelativeWidth(10.0))
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text(StringConstants.kMsgSalemiSicilia)
-                            .font(FontScheme.kAvenirRoman(size: getRelativeHeight(16.0)))
-                            .fontWeight(.regular)
-                            .foregroundColor(ColorConstants.Black900)
-                            .minimumScaleFactor(0.5)
-                            .multilineTextAlignment(.leading)
-                            .frame(width: getRelativeWidth(136.0), height: getRelativeHeight(22.0),
-                                   alignment: .topLeading)
-                            .padding(.trailing)
-                    }
-                    .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(22.0),
-                           alignment: .trailing)
-                    .padding(.top, getRelativeHeight(15.0))
-                    .padding(.leading, getRelativeWidth(10.0))
-                    VStack(alignment: .trailing, spacing: 0) {
-                        Divider()
-                            .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(1.0),
-                                   alignment: .trailing)
-                            .background(ColorConstants.Gray200)
-                    }
-                    .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(1.0),
-                           alignment: .trailing)
-                    .padding(.top, getRelativeHeight(13.0))
-                    .padding(.leading, getRelativeWidth(10.0))
-                }
-                Group {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text(StringConstants.kMsgSalemOhioUn)
-                            .font(FontScheme.kAvenirRoman(size: getRelativeHeight(16.0)))
-                            .fontWeight(.regular)
-                            .foregroundColor(ColorConstants.Black900)
-                            .minimumScaleFactor(0.5)
-                            .multilineTextAlignment(.leading)
-                            .frame(width: getRelativeWidth(276.0), height: getRelativeHeight(22.0),
-                                   alignment: .topLeading)
-                            .padding(.trailing)
-                    }
-                    .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(22.0),
-                           alignment: .trailing)
-                    .padding(.top, getRelativeHeight(14.0))
-                    .padding(.leading, getRelativeWidth(10.0))
-                    VStack(alignment: .trailing, spacing: 0) {
-                        Divider()
-                            .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(1.0),
-                                   alignment: .trailing)
-                            .background(ColorConstants.Gray200)
-                    }
-                    .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(1.0),
-                           alignment: .trailing)
-                    .padding(.top, getRelativeHeight(14.0))
-                    .padding(.leading, getRelativeWidth(10.0))
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text(StringConstants.kMsgSalemSaintPe)
-                            .font(FontScheme.kAvenirRoman(size: getRelativeHeight(16.0)))
-                            .fontWeight(.regular)
-                            .foregroundColor(ColorConstants.Black900)
-                            .minimumScaleFactor(0.5)
-                            .multilineTextAlignment(.leading)
-                            .frame(width: getRelativeWidth(218.0), height: getRelativeHeight(22.0),
-                                   alignment: .topLeading)
-                            .padding(.trailing)
-                    }
-                    .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(22.0),
-                           alignment: .trailing)
-                    .padding(.top, getRelativeHeight(15.0))
-                    .padding(.leading, getRelativeWidth(10.0))
-                    VStack(alignment: .trailing, spacing: 0) {
-                        Divider()
-                            .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(1.0),
-                                   alignment: .trailing)
-                            .background(ColorConstants.Gray200)
-                    }
-                    .frame(width: getRelativeWidth(377.0), height: getRelativeHeight(1.0),
-                           alignment: .trailing)
-                    .padding(.vertical, getRelativeHeight(13.0))
                     .padding(.leading, getRelativeWidth(10.0))
                 }
             }
             .frame(width: UIScreen.main.bounds.width, alignment: .topLeading)
             .background(ColorConstants.WhiteA700)
-            .padding(.top, getRelativeHeight(30.0))
-            .padding(.bottom, getRelativeHeight(10.0))
+            .padding(.top, getRelativeHeight(50.0))
+            .padding(.bottom, getRelativeHeight(40.0))
         }
-        .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+        .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height, alignment: .topLeading)
         .background(ColorConstants.WhiteA700)
-        .ignoresSafeArea()
         .hideNavigationBar()
     }
 }
