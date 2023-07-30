@@ -2,19 +2,21 @@
 //  ViewPort.swift
 //  WeatherApp
 //
-//  Created by Office on 30/07/23.
+//
+// ViewportHelper.swift
 //
 
-import SwiftUI
+import Foundation
+import UIKit
 
-struct ViewPort: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-    }
+func getRelativeHeight(_ size: CGFloat) -> CGFloat {
+    return (size * (CGFloat(UIScreen.main.bounds.height) / 852.0)) * 0.97
 }
 
-struct ViewPort_Previews: PreviewProvider {
-    static var previews: some View {
-        ViewPort()
-    }
+func getRelativeWidth(_ size: CGFloat) -> CGFloat {
+    return size * (CGFloat(UIScreen.main.bounds.width) / 393.0)
+}
+
+func getRelativeFontSize(_ size: CGFloat) -> CGFloat {
+    return size * (CGFloat(UIScreen.main.bounds.width) / 393.0)
 }

@@ -2,7 +2,9 @@
 //  AppConstants.swift
 //  WeatherApp
 //
-//  Created by Office on 30/07/23.
-//
 
 import Foundation
+
+struct AppConstants {
+    static let serverURL: String = "@{serverURL}"
+}

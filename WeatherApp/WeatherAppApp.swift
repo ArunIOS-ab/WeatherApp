@@ -1,17 +1,16 @@
 //
-//  WeatherAppApp.swift
+//  WeatherApp.swift
 //  WeatherApp
-//
-//  Created by Office on 30/07/23.
-//
 
 import SwiftUI
 
 @main
-struct WeatherAppApp: App {
+struct Arunsapplication1App: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            WeatherEmptyView()
         }
     }
 }

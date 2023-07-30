@@ -2,8 +2,7 @@
 //  WeatherAppTests.swift
 //  WeatherAppTests
 //
-//  Created by Office on 30/07/23.
-//
+
 
 import XCTest
 @testable import WeatherApp

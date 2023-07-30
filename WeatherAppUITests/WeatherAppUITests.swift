@@ -2,8 +2,7 @@
 //  WeatherAppUITests.swift
 //  WeatherAppUITests
 //
-//  Created by Office on 30/07/23.
-//
+
 
 import XCTest
 
