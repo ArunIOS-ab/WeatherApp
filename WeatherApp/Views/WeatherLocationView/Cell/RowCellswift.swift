@@ -61,16 +61,10 @@ struct RowCell: View {
             }
             .frame(width: getRelativeWidth(76.0), height: getRelativeHeight(56.0),
                    alignment: .leading)
-            .padding(.leading, getRelativeWidth(180.0))
+            .padding(.leading, getRelativeWidth(170.0))
         }
         .frame(width: getRelativeWidth(359.0), alignment: .leading)
-        .hideNavigationBar()
+        
     }
 }
 
-/* struct RowottawaCell_Previews: PreviewProvider {
-
- static var previews: some View {
-             RowottawaCell()
- }
- } */

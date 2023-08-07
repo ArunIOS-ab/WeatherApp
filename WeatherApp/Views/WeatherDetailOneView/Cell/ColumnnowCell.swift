@@ -34,13 +34,7 @@ struct ColumnnowCell: View {
                 .padding(.horizontal, getRelativeWidth(1.0))
         }
         .frame(width: getRelativeWidth(24.0), alignment: .leading)
-        .hideNavigationBar()
+        
     }
 }
 
-/* struct ColumnnowCell_Previews: PreviewProvider {
-
- static var previews: some View {
-             ColumnnowCell()
- }
- } */

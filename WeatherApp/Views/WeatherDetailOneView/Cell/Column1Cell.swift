@@ -52,14 +52,14 @@ struct Column1Cell: View {
             .frame(width: getRelativeWidth(341.0), height: getRelativeHeight(563.0),
                    alignment: .leading)
             .background(RoundedCorners(topLeft: 4.0, topRight: 4.0, bottomLeft: 4.0,
-                                       bottomRight: 4.0))
+                                       bottomRight: 4.0).fill(Color.clear))
             .padding(.vertical, getRelativeHeight(10.0))
             .padding(.horizontal, getRelativeWidth(10.0))
         }
         .frame(width: getRelativeWidth(359.0), alignment: .leading)
         .background(RoundedCorners(topLeft: 8.0, topRight: 8.0, bottomLeft: 8.0, bottomRight: 8.0)
             .fill(ColorConstants.Gray102))
-        .hideNavigationBar()
+        
     }
 }
 

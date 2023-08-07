@@ -8,6 +8,7 @@ import SwiftUI
 struct WeatherSearchView: View {
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @State private var groupthirtyseven: String = ""
+    @State private var isWeatherData: Bool = false
     var body: some View {
         VStack {
             VStack(alignment: .leading, spacing: 0) {
