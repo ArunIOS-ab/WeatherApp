@@ -73,16 +73,42 @@ struct LLMReasoningBackend: AgentReasoningBackend {
             messages.append(["role": "user", "content": message.text])
         }
 
-        // Observations are replayed as tool messages so the model sees them in
-        // the format it emitted the calls in.
-        for observation in prompt.observations {
-            let payload = observation.result.map { $0.summary }
-                ?? "Error: \(observation.errorMessage ?? "unknown failure")"
-            messages.append([
-                "role": "tool",
-                "tool_call_id": observation.id.uuidString,
-                "content": payload
-            ])
+        // Tool results must be replayed together with the assistant message that
+        // requested them.
+        //
+        // OpenAI-compatible chat completions require every `tool` message to
+        // reference a `tool_call_id` from an immediately preceding assistant
+        // `tool_calls` entry. Sending results alone — or with invented ids, as
+        // this previously did — is rejected by the API on the second request of
+        // any tool-using turn, which silently drops the agent back to
+        // heuristics.
+        if !prompt.observations.isEmpty {
+            var calls: [[String: Any]] = []
+            var results: [[String: Any]] = []
+
+            for observation in prompt.observations {
+                // Fall back to the observation id only if the model gave none.
+                let id = observation.toolCallID ?? observation.id.uuidString
+                calls.append([
+                    "id": id,
+                    "type": "function",
+                    "function": [
+                        "name": observation.tool,
+                        "arguments": observation.rawArguments ?? "{}"
+                    ]
+                ])
+
+                let payload = observation.result.map { $0.summary }
+                    ?? "Error: \(observation.errorMessage ?? "unknown failure")"
+                results.append([
+                    "role": "tool",
+                    "tool_call_id": id,
+                    "content": payload
+                ])
+            }
+
+            messages.append(["role": "assistant", "tool_calls": calls])
+            messages.append(contentsOf: results)
         }
 
         messages.append(["role": "user", "content": prompt.userMessage])
@@ -141,7 +167,13 @@ struct LLMReasoningBackend: AgentReasoningBackend {
 
                 // Drop calls to tools we do not have rather than failing the turn.
                 guard (try? registry.tool(named: name)) != nil else { return nil }
-                return PlannedToolCall(tool: name, arguments: args)
+
+                // Keep the id and the verbatim argument JSON: both are needed to
+                // pair the result with this call on the following request.
+                return PlannedToolCall(tool: name,
+                                       arguments: args,
+                                       toolCallID: call["id"] as? String,
+                                       rawArguments: rawArgs)
             }
 
             guard !planned.isEmpty else {

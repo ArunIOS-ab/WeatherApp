@@ -46,6 +46,9 @@ final class WeatherViewModel: ObservableObject {
     private let agent: WeatherAgent
     private let agentActor: WeatherAgentActor
     private var refreshTask: Task<Void, Never>?
+    /// Monotonic counter identifying the most recent refresh. A response whose
+    /// generation is stale is discarded instead of published.
+    private var refreshGeneration = 0
     private let searchDebounce: UInt64
 
     // MARK: Init
@@ -96,21 +99,43 @@ final class WeatherViewModel: ObservableObject {
     }
 
     /// Pulls the latest weather, regenerates insights, and publishes.
+    ///
+    /// Guards against a stale response overwriting a newer one. `select(location:)`
+    /// can start a second refresh while the first is still in flight, and without
+    /// this check the slower response would land last and publish the *old* city's
+    /// weather under the *new* city's name in the header.
+    ///
+    /// The requested location is captured before awaiting, and results are only
+    /// published if the selection is unchanged and this generation is still the
+    /// current one.
     func refresh() async {
-        refreshTask?.cancel()
+        let requested = location
         isLoading = true
+        refreshGeneration += 1
+        let generation = refreshGeneration
         defer { isLoading = false }
 
         do {
-            let fresh = try await dataSource.snapshot(for: location)
+            let fresh = try await dataSource.snapshot(for: requested)
+
+            // A newer refresh, or a location change, has happened while this
+            // request was in flight. Discard rather than publish stale data.
+            guard generation == refreshGeneration, requested.id == location.id else {
+                return
+            }
+
             snapshot = fresh
             dataUpdatedAt = fresh.fetchedAt
             errorMessage = nil
 
-            await agentActor.refreshInsights(location: location, snapshot: fresh)
+            await agentActor.refreshInsights(location: requested, snapshot: fresh)
+            guard generation == refreshGeneration, requested.id == location.id else {
+                return
+            }
             insights = await agentActor.insights
 
         } catch {
+            guard generation == refreshGeneration else { return }
             errorMessage = error.localizedDescription
         }
     }
@@ -125,7 +150,13 @@ final class WeatherViewModel: ObservableObject {
         location = newLocation
         snapshot = nil
         insights = []
+        // Clear the actor's transcript too, otherwise the next turn appends to
+        // the previous city's history and repopulates `messages` with answers
+        // reasoned from the old location.
         messages = []
+        await agentActor.reset()
+        messages = await agentActor.messageList
+
         searchResults = []
         searchQuery = newLocation.name
         errorMessage = nil
@@ -346,7 +377,14 @@ final class WeatherViewModel: ObservableObject {
         }
     }
 
+    /// Clears the transcript everywhere.
+    ///
+    /// Clearing only the rendered copy is not enough: the actor retains both
+    /// `messages` and `transcript`, and the next `ask` assigns its full
+    /// `messageList` back to `messages`, so a cleared chat would reappear.
     func clearConversation() async {
         messages = []
+        await agentActor.reset()
+        messages = await agentActor.messageList
     }
 }

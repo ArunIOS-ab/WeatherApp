@@ -41,6 +41,21 @@ enum AgentIntent: String, Sendable, CaseIterable {
 struct PlannedToolCall: Sendable, Equatable {
     let tool: String
     let arguments: ToolArguments
+    /// Provider-assigned call id, when the call originated from a model.
+    /// Carried through to the observation so the result can be paired with it.
+    let toolCallID: String?
+    /// The arguments as the model wrote them.
+    let rawArguments: String?
+
+    init(tool: String,
+         arguments: ToolArguments,
+         toolCallID: String? = nil,
+         rawArguments: String? = nil) {
+        self.tool = tool
+        self.arguments = arguments
+        self.toolCallID = toolCallID
+        self.rawArguments = rawArguments
+    }
 
     static func == (lhs: PlannedToolCall, rhs: PlannedToolCall) -> Bool {
         lhs.tool == rhs.tool
@@ -82,12 +97,32 @@ struct ToolObservation: Sendable, Identifiable {
     let result: ToolResult?
     let errorMessage: String?
 
-    init(tool: String, arguments: ToolArguments, result: ToolResult? = nil, errorMessage: String? = nil) {
+    /// The model's own id for this call, when a backend issued it.
+    ///
+    /// Must be echoed back in the following request: OpenAI-compatible APIs pair
+    /// each `tool` message with the assistant `tool_calls` entry that carries
+    /// the same id. Inventing an id here breaks the pairing and the API rejects
+    /// the turn.
+    let toolCallID: String?
+
+    /// The arguments exactly as the model wrote them, for replay. Re-serialising
+    /// `ToolArguments` can reorder or normalise the JSON, which need not match
+    /// what the model emitted.
+    let rawArguments: String?
+
+    init(tool: String,
+         arguments: ToolArguments,
+         result: ToolResult? = nil,
+         errorMessage: String? = nil,
+         toolCallID: String? = nil,
+         rawArguments: String? = nil) {
         self.id = UUID()
         self.tool = tool
         self.arguments = arguments
         self.result = result
         self.errorMessage = errorMessage
+        self.toolCallID = toolCallID
+        self.rawArguments = rawArguments
     }
 
     var succeeded: Bool { result != nil }
@@ -162,12 +197,14 @@ struct HeuristicReasoningBackend: AgentReasoningBackend {
 
         case .travelCommute:
             // Chain the forecast with the calendar so the agent can time the
-            // departure against the user's actual commitments.
+            // departure against the user's actual commitments. The calendar call
+            // is what makes the "schedule" claim true — without it this branch
+            // was no different from a plain forecast question.
             return [
                 PlannedToolCall(tool: "getHourlyWindow",
                                 arguments: ToolArguments(["location": .string(location), "hours": .number(6)])),
-                PlannedToolCall(tool: "getForecastRange",
-                                arguments: ToolArguments(["location": .string(location), "days": .number(1)]))
+                PlannedToolCall(tool: "getCalendarSchedule",
+                                arguments: ToolArguments(["hoursAhead": .number(12)]))
             ]
 
         case .currentConditions:
@@ -227,6 +264,24 @@ struct HeuristicReasoningBackend: AgentReasoningBackend {
         return sections.joined(separator: "\n\n")
     }
 
+    /// Folds the user's calendar into a commute answer.
+    ///
+    /// Without this the calendar tool's output was fetched and discarded, so the
+    /// commute branch advertised a schedule check it never performed. Returns
+    /// nil when there is nothing to say, letting the weather section stand alone.
+    private func calendarContext(_ prompt: AgentPrompt) -> String? {
+        guard let observation = prompt.observations.first(where: { $0.tool == "getCalendarSchedule" }),
+              let summary = observation.result?.summary
+        else { return nil }
+
+        // The tool reports its own "nothing scheduled" case; do not restate it.
+        guard !summary.lowercased().contains("nothing on your calendar") else {
+            return "You don't have anything scheduled in the next few hours, so there's no fixed "
+                + "departure time to work around."
+        }
+        return "Against your calendar — \(summary)"
+    }
+
     private func responseText(for observation: ToolObservation, prompt: AgentPrompt) -> String? {
         switch observation.tool {
         case "fetchCurrentWeather":
@@ -240,6 +295,9 @@ struct HeuristicReasoningBackend: AgentReasoningBackend {
 
         case "getForecastRange":
             return snapshotVerdict(prompt)
+
+        case "getCalendarSchedule":
+            return calendarContext(prompt)
 
         default:
             return observation.result?.summary

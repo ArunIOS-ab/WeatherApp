@@ -175,10 +175,15 @@ struct WeatherAgent: Sendable {
                     do {
                         let tool = try self.registry.tool(named: call.tool)
                         let result = try await tool.run(arguments: call.arguments)
-                        return ToolObservation(tool: call.tool, arguments: call.arguments, result: result)
+                        return ToolObservation(tool: call.tool, arguments: call.arguments,
+                                               result: result,
+                                               toolCallID: call.toolCallID,
+                                               rawArguments: call.rawArguments)
                     } catch {
                         return ToolObservation(tool: call.tool, arguments: call.arguments,
-                                               errorMessage: error.localizedDescription)
+                                               errorMessage: error.localizedDescription,
+                                               toolCallID: call.toolCallID,
+                                               rawArguments: call.rawArguments)
                     }
                 }
             }
@@ -251,6 +256,17 @@ actor WeatherAgentActor {
     }
 
     var messageList: [AgentMessage] { messages }
+
+    /// Discards the conversation.
+    ///
+    /// Both arrays must be cleared: `messages` is what the UI renders, and
+    /// `transcript` is the history fed back to the reasoning backend. Clearing
+    /// only the former leaves the next turn appending to a history the user can
+    /// no longer see.
+    func reset() {
+        messages.removeAll()
+        transcript.removeAll()
+    }
 
     func send(_ text: String, location: GeoLocation, snapshot: WeatherSnapshot?) async throws {
         let userMessage = AgentMessage(role: .user, text: text)
