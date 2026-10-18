@@ -412,7 +412,7 @@ enum InsightGenerator {
                 kind: isSnow ? .warning : .preparation,
                 title: "\(kind.capitalized) expected \(when)",
                 detail: "Precipitation probability climbs to \(rainSoon.precipChance)% "
-                    + "around \(rainSoon.date.formatted(.dateTime.hour().minute())). "
+                    + "around \(snapshot.hourMinute(rainSoon.date)). "
                     + advice,
                 priority: 100
             ))
@@ -436,7 +436,7 @@ enum InsightGenerator {
         if current.apparentTempC < 4, let warmest = bestOutdoorHour(in: snapshot) {
             results.append(AgentInsight(
                 kind: .timing,
-                title: "Delay your trip until \(warmest.date.formatted(.dateTime.hour().minute()))",
+                title: "Delay your trip until \(snapshot.hourMinute(warmest.date))",
                 detail: "It is \(current.apparentTempC.formatted(.number.precision(.fractionLength(0))))°C "
                     + "feels-like now, improving to "
                     + "\(warmest.tempC.formatted(.number.precision(.fractionLength(0))))°C mid-day.",
@@ -470,7 +470,7 @@ enum InsightGenerator {
                 kind: .comfort,
                 title: "Great conditions for a run",
                 detail: best.map {
-                    "\($0.date.formatted(.dateTime.hour().minute())) looks best — "
+                    "\(snapshot.hourMinute($0.date)) looks best — "
                     + "\($0.tempC.formatted(.number.precision(.fractionLength(0))))°C, "
                     + "\($0.windKph.formatted(.number.precision(.fractionLength(0)))) kph wind."
                 } ?? "Light wind and a low rain chance right through the next few hours.",

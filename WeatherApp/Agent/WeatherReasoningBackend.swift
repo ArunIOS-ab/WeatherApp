@@ -365,7 +365,7 @@ struct HeuristicReasoningBackend: AgentReasoningBackend {
             let later = snapshot.hourly.dropFirst(3).prefix(9)
             if let worst = later.max(by: { $0.precipChance < $1.precipChance }),
                worst.precipChance >= 50 {
-                let when = worst.date.formatted(.dateTime.hour().minute())
+                let when = snapshot.hourMinute(worst.date)
                 let kind = precipitationNoun(for: snapshot, hour: worst)
                 parts.append("That said, \(kind) risk climbs to \(worst.precipChance)% "
                     + "around \(when), so it is not uniformly clear.")
@@ -429,8 +429,8 @@ struct HeuristicReasoningBackend: AgentReasoningBackend {
                 + "it's unsettled throughout."
         }
 
-        let start = best.0.date.formatted(.dateTime.hour().minute())
-        let end = best.0.date.addingTimeInterval(3600).formatted(.dateTime.hour().minute())
+        let start = snapshot.hourMinute(best.0.date)
+        let end = snapshot.hourMinute(best.0.date.addingTimeInterval(3600))
 
         let temp = best.0.tempC.formatted(.number.precision(.fractionLength(0)))
         let wind = best.0.windKph.formatted(.number.precision(.fractionLength(0)))
@@ -447,7 +447,7 @@ struct HeuristicReasoningBackend: AgentReasoningBackend {
         if let worst = upcoming.max(by: { $0.precipChance < $1.precipChance }),
            worst.precipChance >= 40,
            worst.precipChance > best.0.precipChance + 15 {
-            let worstTime = worst.date.formatted(.dateTime.hour().minute())
+            let worstTime = snapshot.hourMinute(worst.date)
             let worstKind = precipitationNoun(for: snapshot, hour: worst)
             answer += " Note that \(worstKind) risk climbs to \(worst.precipChance)% "
                 + "around \(worstTime), so plan to be inside by then."

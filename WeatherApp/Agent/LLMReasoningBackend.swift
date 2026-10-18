@@ -230,10 +230,14 @@ struct LLMReasoningBackend: AgentReasoningBackend {
     /// Serialises the snapshot into a compact context block.
     static func contextBlock(_ snapshot: WeatherSnapshot) -> String {
         let current = snapshot.current
+        // Format in the forecast city's zone: the model must see the times a
+        // resident of that city would read off the wall clock.
         let hourFormat = DateFormatter()
         hourFormat.dateFormat = "HH:mm"
+        hourFormat.timeZone = snapshot.timeZone
         let dayFormat = DateFormatter()
         dayFormat.dateFormat = "yyyy-MM-dd"
+        dayFormat.timeZone = snapshot.timeZone
 
         let hourly = snapshot.hourly.prefix(6).map { hour in
             "\(hourFormat.string(from: hour.date)): \(hour.tempC)°C, rain \(hour.precipChance)%, wind \(hour.windKph)kph"

@@ -9,6 +9,9 @@ struct RowtodayCell: View {
     let day: DailyForecast
     /// First row reads "Today", later rows read the weekday.
     var isToday: Bool = false
+    /// The forecast city's zone, so weekday names match the city's calendar
+    /// rather than the device's.
+    var timeZone: TimeZone = .current
 
     var body: some View {
         HStack {
@@ -78,7 +81,16 @@ struct RowtodayCell: View {
     private var dayLabel: String {
         isToday
             ? StringConstants.kLblToday
-            : day.date.formatted(.dateTime.weekday(.abbreviated))
+            : Self.weekdayFormatter(timeZone: timeZone).string(from: day.date)
+    }
+
+    /// The city's weekday, not the device's.
+    private static func weekdayFormatter(timeZone: TimeZone) -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = timeZone
+        formatter.dateFormat = "EEE"
+        return formatter
     }
 
     private var highLabel: String { "\(Int(day.maxTempC.rounded()))°" }

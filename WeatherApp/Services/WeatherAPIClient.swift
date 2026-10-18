@@ -234,7 +234,10 @@ struct ForecastResponse: Decodable {
             hourly: Array(hourly),
             daily: daily,
             alerts: alertList,
-            fetchedAt: Date()
+            fetchedAt: Date(),
+            // Retained so consumers can format instants in the city's zone
+            // rather than the device's.
+            timeZoneIdentifier: location.tzId
         )
     }
 

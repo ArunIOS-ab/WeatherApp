@@ -60,6 +60,11 @@ struct WeatherDetailOneView: View {
         Array(viewModel.snapshot?.hourly.prefix(7) ?? [])
     }
 
+    /// The forecast city's zone. All displayed times use this, not the device's.
+    private var forecastZone: TimeZone {
+        viewModel.snapshot?.timeZone ?? .current
+    }
+
     private var forecastDays: [DailyForecast] {
         viewModel.snapshot?.daily ?? []
     }
@@ -308,7 +313,7 @@ struct WeatherDetailOneView: View {
                                             LazyHStack {
                                                 ForEach(upcomingHours) { hour in
                                                     //MARK: - Hourly Forecast UI
-                                                    ColumnnowCell(hour: hour)
+                                                    ColumnnowCell(hour: hour, timeZone: forecastZone)
                                                 }
                                             }
                                         }
@@ -356,7 +361,8 @@ struct WeatherDetailOneView: View {
                                             LazyVStack {
                                                 ForEach(forecastDays, id: \.date) { day in
                                                     RowtodayCell(day: day,
-                                                                isToday: day.id == today?.id)
+                                                                isToday: day.id == today?.id,
+                                                                timeZone: forecastZone)
                                                 }
                                             }
                                         }

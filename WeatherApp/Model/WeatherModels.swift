@@ -104,10 +104,79 @@ struct WeatherSnapshot: Codable, Hashable {
     let daily: [DailyForecast]
     let alerts: [WeatherAlert]
     let fetchedAt: Date
+    /// IANA identifier for the forecast city, e.g. "Asia/Tokyo".
+    ///
+    /// Every `Date` in this snapshot is an absolute instant, so displaying one
+    /// with `formatted(.dateTime.hour())` renders it in the *device's* zone and
+    /// shows the wrong time for anywhere else on Earth. Formatting through this
+    /// snapshot's zone is what makes "Tokyo 20:00" read as 20:00 on a device
+    /// sitting in Toronto.
+    let timeZoneIdentifier: String?
 
     /// Forecast horizons the agent is allowed to reason over. Beyond this,
     /// confidence drops far enough that the agent should say so out loud.
     static let reliableHorizonHours: Int = 48
+
+    /// The forecast city's zone, falling back to the device zone when unknown.
+    var timeZone: TimeZone {
+        guard let id = timeZoneIdentifier, let zone = TimeZone(identifier: id) else {
+            return .current
+        }
+        return zone
+    }
+}
+
+// MARK: - City-local formatting
+
+extension WeatherSnapshot {
+    /// Formats a forecast instant as the forecast city's wall clock.
+    ///
+    /// Prefer these over `Date.formatted(...)`, which always uses the device
+    /// zone and silently shifts times for any city abroad.
+    ///
+    /// `Date.FormatStyle` exposes no `timeZone` modifier, so these use
+    /// `DateFormatter`, which does. Formatters are cached per zone because
+    /// they are expensive to construct.
+    func hourMinute(_ date: Date) -> String {
+        Self.cityFormatter(zone: timeZone, format: "HH:mm").string(from: date)
+    }
+
+    func clockTime(_ date: Date) -> String {
+        Self.cityFormatter(zone: timeZone, format: "h:mm a").string(from: date)
+    }
+
+    func weekday(_ date: Date) -> String {
+        Self.cityFormatter(zone: timeZone, format: "EEEE").string(from: date)
+    }
+
+    func shortWeekday(_ date: Date) -> String {
+        Self.cityFormatter(zone: timeZone, format: "EEE").string(from: date)
+    }
+
+    /// Hour-of-day in the forecast city, used to decide whether an entry is
+    /// day or night there rather than where the device happens to be.
+    func hourOfDay(_ date: Date) -> Int {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+        return calendar.component(.hour, from: date)
+    }
+
+    private static func cityFormatter(zone: TimeZone, format: String) -> DateFormatter {
+        let key = "\(format)|\(zone.identifier)"
+        if let cached = cityFormatters[key] { return cached }
+
+        let formatter = DateFormatter()
+        // POSIX locale keeps parsing and rendering independent of the user's
+        // calendar preference.
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = zone
+        formatter.dateFormat = format
+        cityFormatters[key] = formatter
+        return formatter
+    }
+
+    private static let cityFormattersLock = NSLock()
+    private static var cityFormatters: [String: DateFormatter] = [:]
 }
 
 struct WeatherAlert: Codable, Hashable, Identifiable {
