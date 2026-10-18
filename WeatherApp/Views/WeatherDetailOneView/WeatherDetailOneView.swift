@@ -8,6 +8,19 @@ struct WeatherDetailOneView: View {
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @State private var groupsevenText: String = ""
     @State var isEdit: Bool = false
+
+    // MARK: - Agentic layer
+
+    @StateObject private var viewModel = WeatherViewModel(
+        location: GeoLocation(name: "Ottawa",
+                             region: "Ontario",
+                             country: "Canada",
+                             lat: 45.4215,
+                             lon: -75.6972)
+    )
+    @State private var showAgentChat = false
+    @State private var followUpQuestion: String?
+
     var body: some View {
         NavigationStack{
             VStack {
@@ -185,6 +198,56 @@ struct WeatherDetailOneView: View {
                                 }
                                 .frame(width: getRelativeWidth(361.0), height: getRelativeHeight(242.0),
                                        alignment: .leading)
+
+                                //MARK: - Agent Insights (proactive recommendations)
+                                AgentInsightsSection(insights: viewModel.insights) { insight in
+                                    followUpQuestion = "\(insight.title) — \(insight.detail)"
+                                    showAgentChat = true
+                                }
+                                .padding(.top, getRelativeHeight(22.0))
+
+                                //MARK: - Ask the Agent CTA
+                                Button {
+                                    showAgentChat = true
+                                } label: {
+                                    HStack(spacing: getRelativeWidth(8.0)) {
+                                        if viewModel.isLoading {
+                                            ProgressView()
+                                                .scaleEffect(0.7)
+                                        } else {
+                                            Image(systemName: "sparkles")
+                                                .resizable()
+                                                .frame(width: getRelativeWidth(16.0),
+                                                       height: getRelativeWidth(16.0))
+                                                .scaledToFit()
+                                        }
+                                        Text(viewModel.isLoading
+                                             ? StringConstants.kLblLoading
+                                             : StringConstants.kLblAskAgent)
+                                            .font(FontScheme.kAvenirMedium(size: getRelativeHeight(14.0)))
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .resizable()
+                                            .frame(width: getRelativeWidth(10.0),
+                                                   height: getRelativeWidth(10.0))
+                                            .scaledToFit()
+                                    }
+                                    .foregroundColor(viewModel.canAskAgent
+                                                     ? ColorConstants.IndigoA400
+                                                     : ColorConstants.Gray400)
+                                    .padding(getRelativeWidth(14.0))
+                                    .background(
+                                        RoundedCorners(topLeft: 8.0, topRight: 8.0,
+                                                       bottomLeft: 8.0, bottomRight: 8.0)
+                                            .fill(ColorConstants.Gray101)
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                // Disabled while loading so the user is not taken
+                                // into a chat with no weather data behind it.
+                                .disabled(!viewModel.canAskAgent)
+                                .padding(.top, getRelativeHeight(10.0))
+
                                 //MARK: - Today Forecast(Partly Cloudy) UI
                                 VStack {
                                     VStack {
@@ -338,6 +401,24 @@ struct WeatherDetailOneView: View {
             .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height, alignment: .top)
             .background(ColorConstants.WhiteA700)
         }
+        .task {
+            // Pulls the latest snapshot and generates the proactive insights.
+            await viewModel.load()
+        }
+        .sheet(isPresented: $showAgentChat) {
+            AgentChatView(viewModel: viewModel,
+                          initialQuestion: followUpQuestion)
+                .presentationDetents([.large])
+        }
+        .alert(
+            StringConstants.kLblWeatherAgent,
+            isPresented: Binding(
+                get: { viewModel.errorMessage != nil && viewModel.messages.isEmpty },
+                set: { if !$0 { viewModel.errorMessage = nil } }
+            ),
+            actions: { Button("OK") { viewModel.errorMessage = nil } },
+            message: { Text(viewModel.errorMessage ?? "") }
+        )
     }
 }
 
@@ -346,27 +427,3 @@ struct WeatherDetailOneView_Previews: PreviewProvider {
         WeatherDetailOneView()
     }
 }
-
-/*
- 
- HStack {
-                             Image("img_vector_red_400")
-                                 .resizable()
-                                 .frame(width: getRelativeWidth(14.0),
-                                        height: getRelativeHeight(16.0), alignment: .center)
-                                 .scaledToFit()
-                                 .clipped()
-                             Text(StringConstants.kLblRemove)
-                                 .font(FontScheme.kAvenirRoman(size: getRelativeHeight(16.0)))
-                                 .fontWeight(.regular)
-                                 .foregroundColor(ColorConstants.Red400)
-                                 .minimumScaleFactor(0.5)
-                                 .multilineTextAlignment(.leading)
-                                 .frame(width: getRelativeWidth(59.0),
-                                        height: getRelativeHeight(22.0), alignment: .topLeading)
-                                 .padding(.leading, getRelativeWidth(6.0))
-                         }
-                         .frame(width: getRelativeWidth(79.0), height: getRelativeHeight(22.0),
-                                alignment: .center)
- 
- */

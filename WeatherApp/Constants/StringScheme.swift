@@ -85,4 +85,15 @@ struct StringConstants {
     static let kLbl21C: String = "21°c"
     static let kInvalidUrl: String = "Invalid URL"
     static let kLblBerlinGermany: String = "Berlin, Germany"
+    // MARK: - Agentic layer
+    static let kLblAskAgent: String = "Ask the agent"
+    static let kLblAgentRecommendations: String = "Agent recommendations"
+    static let kLblLive: String = "LIVE"
+    static let kLblWeatherAgent: String = "Weather Agent"
+    static let kLblThinking: String = "Thinking"
+    static let kLblHideThinking: String = "Hide reasoning"
+    static let kMsgAskAgentPlaceholder: String = "Ask about the weather"
+    static let kMsgWaitingForWeather: String = "Loading weather data…"
+    static let kLblLoading: String = "Loading"
+    static let kMsgAgentIntro: String = "I can look at current conditions and the forecast, check your calendar, work out what to wear or pack, and time outdoor plans around the weather. Ask me anything about today or the week ahead."
 }

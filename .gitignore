@@ -1,0 +1,17 @@
+# Secrets — never commit
+Config/Secrets.xcconfig
+*.xcconfig.local
+
+# Xcode user state
+xcuserdata/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+
+# Build artefacts
+DerivedData/
+build/
+*.ipa
+*.dSYM.zip
+
+# macOS
+.DS_Store
