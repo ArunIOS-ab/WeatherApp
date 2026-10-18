@@ -1,0 +1,20 @@
+// Shared.xcconfig
+//
+// Settings shared by every configuration. Secrets do NOT go here — this file is
+// committed. `Secrets.xcconfig` is included from it and is git-ignored.
+//
+// Add your weatherapi.com key in Secrets.xcconfig:
+//     WEATHER_API_KEY = your_key_here
+//
+// Get a free key at https://www.weatherapi.com/signup.aspx
+//
+// Note: a key embedded in an app binary can be extracted, and a leaked key can
+// rack up charges. Restrict it by API scope in the provider dashboard, and for
+// anything shipped, proxy weather requests through your own backend instead.
+
+#include? "Secrets.xcconfig"
+
+// WEATHER_API_KEY is defined in Secrets.xcconfig and flows in via the #include
+// above. Do NOT add `WEATHER_API_KEY = $(WEATHER_API_KEY)` here: an xcconfig
+// setting that references itself resolves to empty, which would silently blank
+// the key. The target reads it through INFOPLIST_KEY_WEATHER_API_KEY instead.

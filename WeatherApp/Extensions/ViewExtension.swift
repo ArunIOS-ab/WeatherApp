@@ -8,7 +8,7 @@ import Foundation
 import SwiftUI
 import UIKit
 
-// Hide default navigation bar from Navigation link screen. 4c6e2aaa3c3c4cec8d932610233007
+// Hide default navigation bar from Navigation link screen.
 extension View {
     func hideNavigationBar() -> some View {
         self

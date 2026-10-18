@@ -38,6 +38,20 @@
 		969374B52A760F5000D8D541 /* WeatherAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969374B42A760F5000D8D541 /* WeatherAppTests.swift */; };
 		969374BF2A760F5000D8D541 /* WeatherAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969374BE2A760F5000D8D541 /* WeatherAppUITests.swift */; };
 		969374C12A760F5000D8D541 /* WeatherAppUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969374C02A760F5000D8D541 /* WeatherAppUITestsLaunchTests.swift */; };
+		AG0001000000000000000002 /* WeatherApp/Model/WeatherModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG0001000000000000000001 /* WeatherApp/Model/WeatherModels.swift */; };
+		AG0002000000000000000002 /* WeatherApp/Agent/WeatherTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG0002000000000000000001 /* WeatherApp/Agent/WeatherTool.swift */; };
+		AG0003000000000000000002 /* WeatherApp/Agent/WeatherToolImplementations.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG0003000000000000000001 /* WeatherApp/Agent/WeatherToolImplementations.swift */; };
+		AG0004000000000000000002 /* WeatherApp/Agent/WeatherReasoningBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG0004000000000000000001 /* WeatherApp/Agent/WeatherReasoningBackend.swift */; };
+		AG0005000000000000000002 /* WeatherApp/Agent/WeatherAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG0005000000000000000001 /* WeatherApp/Agent/WeatherAgent.swift */; };
+		AG0006000000000000000002 /* WeatherApp/Agent/FoundationModelsBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG0006000000000000000001 /* WeatherApp/Agent/FoundationModelsBackend.swift */; };
+		AG0007000000000000000002 /* WeatherApp/Agent/LLMReasoningBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG0007000000000000000001 /* WeatherApp/Agent/LLMReasoningBackend.swift */; };
+		AG0008000000000000000002 /* WeatherApp/ViewModel/WeatherViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG0008000000000000000001 /* WeatherApp/ViewModel/WeatherViewModel.swift */; };
+		AG0009000000000000000002 /* WeatherApp/Services/WeatherAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG0009000000000000000001 /* WeatherApp/Services/WeatherAPIClient.swift */; };
+		AG0070000000000000000002 /* WeatherApp/Agent/FoundationModelsAvailability.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG0070000000000000000001 /* WeatherApp/Agent/FoundationModelsAvailability.swift */; };
+		AG00A1000000000000000002 /* WeatherApp/Views/AgentView/AgentInsightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG00A1000000000000000001 /* WeatherApp/Views/AgentView/AgentInsightView.swift */; };
+		AG00C8000000000000000002 /* WeatherApp/Model/ListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG00C8000000000000000001 /* WeatherApp/Model/ListModel.swift */; };
+		AG00D1000000000000000002 /* LocationSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG00D1000000000000000001 /* LocationSearchView.swift */; };
+		AG00E1000000000000000002 /* WeatherIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG00E1000000000000000001 /* WeatherIcon.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +72,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		024060153084CF4000335746 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
+		024060163084CF4000335746 /* Shared.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Shared.xcconfig; sourceTree = "<group>"; };
 		965769F82A7620260008180A /* WeatherLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherLocationView.swift; sourceTree = "<group>"; };
 		965769FB2A76205C0008180A /* RowCellswift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RowCellswift.swift; sourceTree = "<group>"; };
 		965769FF2A7621560008180A /* WeatherDetailOneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherDetailOneView.swift; sourceTree = "<group>"; };
@@ -92,6 +108,21 @@
 		969374BA2A760F5000D8D541 /* WeatherAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WeatherAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		969374BE2A760F5000D8D541 /* WeatherAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherAppUITests.swift; sourceTree = "<group>"; };
 		969374C02A760F5000D8D541 /* WeatherAppUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherAppUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		AG0001000000000000000001 /* WeatherApp/Model/WeatherModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherApp/Model/WeatherModels.swift; sourceTree = SOURCE_ROOT; };
+		AG0002000000000000000001 /* WeatherApp/Agent/WeatherTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherApp/Agent/WeatherTool.swift; sourceTree = SOURCE_ROOT; };
+		AG0003000000000000000001 /* WeatherApp/Agent/WeatherToolImplementations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherApp/Agent/WeatherToolImplementations.swift; sourceTree = SOURCE_ROOT; };
+		AG0004000000000000000001 /* WeatherApp/Agent/WeatherReasoningBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherApp/Agent/WeatherReasoningBackend.swift; sourceTree = SOURCE_ROOT; };
+		AG0005000000000000000001 /* WeatherApp/Agent/WeatherAgent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherApp/Agent/WeatherAgent.swift; sourceTree = SOURCE_ROOT; };
+		AG0006000000000000000001 /* WeatherApp/Agent/FoundationModelsBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherApp/Agent/FoundationModelsBackend.swift; sourceTree = SOURCE_ROOT; };
+		AG0007000000000000000001 /* WeatherApp/Agent/LLMReasoningBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherApp/Agent/LLMReasoningBackend.swift; sourceTree = SOURCE_ROOT; };
+		AG0008000000000000000001 /* WeatherApp/ViewModel/WeatherViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherApp/ViewModel/WeatherViewModel.swift; sourceTree = SOURCE_ROOT; };
+		AG0009000000000000000001 /* WeatherApp/Services/WeatherAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherApp/Services/WeatherAPIClient.swift; sourceTree = SOURCE_ROOT; };
+		AG0070000000000000000001 /* WeatherApp/Agent/FoundationModelsAvailability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherApp/Agent/FoundationModelsAvailability.swift; sourceTree = SOURCE_ROOT; };
+		AG00A1000000000000000001 /* WeatherApp/Views/AgentView/AgentInsightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherApp/Views/AgentView/AgentInsightView.swift; sourceTree = SOURCE_ROOT; };
+		AG00C8000000000000000001 /* WeatherApp/Model/ListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherApp/Model/ListModel.swift; sourceTree = SOURCE_ROOT; };
+		AG00C1000000000000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "WeatherApp/Info.plist"; sourceTree = SOURCE_ROOT; };
+		AG00D1000000000000000001 /* LocationSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WeatherApp/Views/AgentView/LocationSearchView.swift"; sourceTree = SOURCE_ROOT; };
+		AG00E1000000000000000001 /* WeatherIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WeatherApp/Views/AgentView/WeatherIcon.swift"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,9 +151,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		024060173084CF4000335746 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				024060153084CF4000335746 /* Secrets.xcconfig */,
+				024060163084CF4000335746 /* Shared.xcconfig */,
+			);
+			path = Config;
+			sourceTree = SOURCE_ROOT;
+		};
 		965769F22A761F7F0008180A /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				AG00D1000000000000000003 /* AgentView */,
+				AG00A1000000000000000003 /* AgentView */,
 				96576A092A7621FA0008180A /* WeatherSearchView */,
 				965769FD2A76212E0008180A /* WeatherDetailOneView */,
 				965769F72A7620060008180A /* WeatherLocationView */,
@@ -195,6 +237,7 @@
 		96576A0F2A76227C0008180A /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				AG0009000000000000000001 /* WeatherApp/Services/WeatherAPIClient.swift */,
 				96576A102A76228D0008180A /* APIManager.swift */,
 			);
 			path = Services;
@@ -279,6 +322,11 @@
 		969374A22A760F4E00D8D541 /* WeatherApp */ = {
 			isa = PBXGroup;
 			children = (
+				AG00C1000000000000000001 /* Info.plist */,
+				024060173084CF4000335746 /* Config */,
+				AG0065000000000000000001 /* Agent */,
+				AG0066000000000000000001 /* ViewModel */,
+				AG0068000000000000000001 /* Model */,
 				96576A152A7622FA0008180A /* logs */,
 				96576A0F2A76227C0008180A /* Services */,
 				96576A0C2A76223C0008180A /* Utilities */,
@@ -318,6 +366,54 @@
 				969374C02A760F5000D8D541 /* WeatherAppUITestsLaunchTests.swift */,
 			);
 			path = WeatherAppUITests;
+			sourceTree = "<group>";
+		};
+		AG0065000000000000000001 /* Agent */ = {
+			isa = PBXGroup;
+			children = (
+				AG0070000000000000000001 /* WeatherApp/Agent/FoundationModelsAvailability.swift */,
+				AG0002000000000000000001 /* WeatherApp/Agent/WeatherTool.swift */,
+				AG0003000000000000000001 /* WeatherApp/Agent/WeatherToolImplementations.swift */,
+				AG0004000000000000000001 /* WeatherApp/Agent/WeatherReasoningBackend.swift */,
+				AG0005000000000000000001 /* WeatherApp/Agent/WeatherAgent.swift */,
+				AG0006000000000000000001 /* WeatherApp/Agent/FoundationModelsBackend.swift */,
+				AG0007000000000000000001 /* WeatherApp/Agent/LLMReasoningBackend.swift */,
+			);
+			path = Agent;
+			sourceTree = "<group>";
+		};
+		AG0066000000000000000001 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				AG0008000000000000000001 /* WeatherApp/ViewModel/WeatherViewModel.swift */,
+			);
+			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		AG0068000000000000000001 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				AG00C8000000000000000001 /* WeatherApp/Model/ListModel.swift */,
+				AG0001000000000000000001 /* WeatherApp/Model/WeatherModels.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		AG00A1000000000000000003 /* AgentView */ = {
+			isa = PBXGroup;
+			children = (
+				AG00A1000000000000000001 /* WeatherApp/Views/AgentView/AgentInsightView.swift */,
+			);
+			path = AgentView;
+			sourceTree = "<group>";
+		};
+		AG00D1000000000000000003 /* AgentView */ = {
+			isa = PBXGroup;
+			children = (
+				AG00E1000000000000000001 /* WeatherIcon.swift */,
+				AG00D1000000000000000001 /* LocationSearchView.swift */,
+			);
+			path = AgentView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -456,6 +552,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AG00E1000000000000000002 /* WeatherIcon.swift in Sources */,
+				AG00D1000000000000000002 /* LocationSearchView.swift in Sources */,
+				AG00A1000000000000000002 /* WeatherApp/Views/AgentView/AgentInsightView.swift in Sources */,
+				AG0070000000000000000002 /* WeatherApp/Agent/FoundationModelsAvailability.swift in Sources */,
+				AG00C8000000000000000002 /* WeatherApp/Model/ListModel.swift in Sources */,
+				AG0001000000000000000002 /* WeatherApp/Model/WeatherModels.swift in Sources */,
+				AG0002000000000000000002 /* WeatherApp/Agent/WeatherTool.swift in Sources */,
+				AG0003000000000000000002 /* WeatherApp/Agent/WeatherToolImplementations.swift in Sources */,
+				AG0004000000000000000002 /* WeatherApp/Agent/WeatherReasoningBackend.swift in Sources */,
+				AG0005000000000000000002 /* WeatherApp/Agent/WeatherAgent.swift in Sources */,
+				AG0006000000000000000002 /* WeatherApp/Agent/FoundationModelsBackend.swift in Sources */,
+				AG0007000000000000000002 /* WeatherApp/Agent/LLMReasoningBackend.swift in Sources */,
+				AG0008000000000000000002 /* WeatherApp/ViewModel/WeatherViewModel.swift in Sources */,
+				AG0009000000000000000002 /* WeatherApp/Services/WeatherAPIClient.swift in Sources */,
 				965769F92A7620260008180A /* WeatherLocationView.swift in Sources */,
 				9666C67E2A76140C004CEF4B /* FontScheme.swift in Sources */,
 				96576A022A76217A0008180A /* Column1Cell.swift in Sources */,
@@ -519,6 +629,7 @@
 /* Begin XCBuildConfiguration section */
 		969374C22A760F5000D8D541 /* Debug */ = {
 			isa = XCBuildConfiguration;
+						baseConfigurationReference = 024060163084CF4000335746 /* Shared.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -579,6 +690,7 @@
 		};
 		969374C32A760F5000D8D541 /* Release */ = {
 			isa = XCBuildConfiguration;
+						baseConfigurationReference = 024060163084CF4000335746 /* Shared.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -640,12 +752,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"WeatherApp/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = WeatherApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -668,12 +776,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"WeatherApp/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = WeatherApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
