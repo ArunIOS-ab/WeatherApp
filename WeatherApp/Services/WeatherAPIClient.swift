@@ -163,20 +163,30 @@ struct ForecastResponse: Decodable {
             cloudCover: current.cloud
         )
 
-        // Pair each hour with its parent day's date. The closure parameters are named
-        // explicitly: an inner `$0` would shadow the ForecastDayPayload and refer
-        // to HourPayload, which has no `date` of its own (only `time`).
+        // The forecast clock belongs to the queried city, not to the device. Parsing
+        // "2026-10-18 14:00" in the device's zone makes every displayed hour
+        // wrong by the zone difference (Tokyo is 13 hours ahead of Toronto), and
+        // can land on the wrong calendar day near midnight.
+        let zone = Self.timeZone(for: location)
+
+        // Pair each hour with its parent day's date. The closure parameters are
+        // named explicitly: an inner `$0` would shadow the ForecastDayPayload
+        // and refer to HourPayload, which has no `date` of its own (only `time`).
+        //
+        // Build every entry before filtering. `forecastday[0].hour` starts at
+        // 00:00, so taking a prefix of the flattened list yields midnight-to-23:00
+        // of the first date — mostly hours that have already passed. The
+        // dashboard, the timing tool and the insights all assume a forward-looking
+        // window, so past hours are dropped before the limit is applied.
+        let now = Date()
         let hourly = forecast.forecastday
             .flatMap { day in
                 day.hour.map { hour in (dayDate: day.date, hour: hour) }
             }
-            .prefix(24)
             .map { pair in
                 let hour = pair.hour
                 return HourlyForecast(
-                    // weatherapi sends the hour clock ("14:00") separately from the
-                    // day ("2026-10-18"), so combine them into one instant.
-                    date: Self.parseHour(pair.dayDate, time: hour.time),
+                    date: Self.parseHour(pair.dayDate, time: hour.time, zone: zone),
                     tempC: hour.tempC,
                     feelsLikeC: hour.feelsLikeC,
                     conditionText: hour.condition.text,
@@ -188,11 +198,15 @@ struct ForecastResponse: Decodable {
                     isDay: hour.isDay == 1
                 )
             }
+            // Keep the current hour onward. A small negative tolerance keeps the
+            // hour in progress rather than dropping straight to the next one.
+            .filter { $0.date >= now.addingTimeInterval(-1800) }
+            .prefix(24)
 
         let daily = forecast.forecastday.map { day in
             let astro = day.astro
             return DailyForecast(
-                date: Self.parseDate(day.date),
+                date: Self.parseDate(day.date, zone: zone),
                 maxTempC: day.day.maxtempC,
                 minTempC: day.day.mintempC,
                 conditionText: day.day.condition.text,
@@ -200,8 +214,8 @@ struct ForecastResponse: Decodable {
                 precipMM: day.day.totalprecipMm,
                 uvIndex: day.day.uv,
                 windKph: day.day.maxwindKph,
-                sunrise: astro.flatMap { Self.parseAstronomy($0.sunrise, on: day.date) },
-                sunset: astro.flatMap { Self.parseAstronomy($0.sunset, on: day.date) }
+                sunrise: astro.flatMap { Self.parseAstronomy($0.sunrise, on: day.date, zone: zone) },
+                sunset: astro.flatMap { Self.parseAstronomy($0.sunset, on: day.date, zone: zone) }
             )
         }
 
@@ -220,7 +234,10 @@ struct ForecastResponse: Decodable {
             hourly: Array(hourly),
             daily: daily,
             alerts: alertList,
-            fetchedAt: Date()
+            fetchedAt: Date(),
+            // Retained so consumers can format instants in the city's zone
+            // rather than the device's.
+            timeZoneIdentifier: location.tzId
         )
     }
 
@@ -233,25 +250,37 @@ struct ForecastResponse: Decodable {
     /// Prepending the day unconditionally produced strings like
     /// "2026-10-18 2026-10-18 14:00", which fail to parse and silently fall back
     /// to midnight — collapsing the entire hourly series onto one timestamp.
-    private static func parseHour(_ day: String, time: String) -> Date {
+    private static func parseHour(_ day: String, time: String, zone: TimeZone) -> Date {
         // Already a full timestamp: use as-is.
-        if let date = makeFormatter("yyyy-MM-dd HH:mm").date(from: time) {
+        if let date = makeFormatter("yyyy-MM-dd HH:mm", zone: zone).date(from: time) {
             return date
         }
         // Bare clock ("14:00"): combine with the parent day.
-        if let date = makeFormatter("yyyy-MM-dd HH:mm").date(from: "\(day) \(time)") {
+        if let date = makeFormatter("yyyy-MM-dd HH:mm", zone: zone).date(from: "\(day) \(time)") {
             return date
         }
         // Last resort: keep the correct day rather than snapping to "now".
-        return parseDate(day)
+        return parseDate(day, zone: zone)
     }
 
-    /// weatherapi returns local timestamps as "2024-05-01 10:00" with no zone.
-    private static func parseDate(_ raw: String) -> Date {
+    /// weatherapi returns local timestamps as "2024-05-01 10:00" with no zone, so
+    /// they must be interpreted in the queried city's zone.
+    private static func parseDate(_ raw: String, zone: TimeZone) -> Date {
         for format in ["yyyy-MM-dd HH:mm", "yyyy-MM-dd"] {
-            if let date = makeFormatter(format).date(from: raw) { return date }
+            if let date = makeFormatter(format, zone: zone).date(from: raw) { return date }
         }
         return Date()
+    }
+
+    /// Resolves the forecast location's IANA zone.
+    ///
+    /// Falls back to the device zone when the provider sends an identifier this
+    /// system does not recognise, which is better than failing to parse at all.
+    private static func timeZone(for location: LocationPayload) -> TimeZone {
+        guard let id = location.tzId, let zone = TimeZone(identifier: id) else {
+            return .current
+        }
+        return zone
     }
 
     /// Parses a sunrise/sunset clock value.
@@ -261,18 +290,18 @@ struct ForecastResponse: Decodable {
     /// behaviour) extracted "07:23" and failed, so sunrise/sunset were always nil.
     ///
     /// - Parameter day: the forecast day, used to supply the missing date.
-    private static func parseAstronomy(_ raw: String, on day: String) -> Date? {
+    private static func parseAstronomy(_ raw: String, on day: String, zone: TimeZone) -> Date? {
         let clock = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !clock.isEmpty else { return nil }
 
         // "hh:mm a" handles the 12-hour values weatherapi sends; "HH:mm" covers any
         // 24-hour variant.
         for format in ["hh:mm a", "HH:mm"] {
-            if let parsed = makeFormatter(format).date(from: clock.uppercased()) {
+            if let parsed = makeFormatter(format, zone: zone).date(from: clock.uppercased()) {
                 // Combine the parsed clock with the forecast day's date so the
                 // value carries both parts.
-                let time = makeFormatter("HH:mm").string(from: parsed)
-                if let date = makeFormatter("yyyy-MM-dd HH:mm").date(from: "\(day) \(time)") {
+                let time = makeFormatter("HH:mm", zone: zone).string(from: parsed)
+                if let date = makeFormatter("yyyy-MM-dd HH:mm", zone: zone).date(from: "\(day) \(time)") {
                     return date
                 }
             }
@@ -280,35 +309,43 @@ struct ForecastResponse: Decodable {
         return nil
     }
 
-    /// Cached formatters.
+    /// Formatters keyed by format *and* time zone.
     ///
-    /// `DateFormatter` is expensive to construct, and this runs once per
-    /// forecast entry (up to 120 calls per response). Building one per call
-    /// showed up as a measurable decode cost.
-    private static let formatters: [String: DateFormatter] = {
-        ["yyyy-MM-dd HH:mm", "yyyy-MM-dd", "hh:mm a"].reduce(into: [:]) { result, format in
-            let formatter = DateFormatter()
-            // POSIX locale is required, otherwise a user's calendar (for example
-            // a Buddhist or Japanese locale) makes parsing fail outright.
-            formatter.locale = Locale(identifier: "en_US_POSIX")
-            // weatherapi sends local wall-clock time with no offset.
-            formatter.timeZone = .current
-            formatter.dateFormat = format
-            result[format] = formatter
-        }
+    /// A `DateFormatter` carries its zone as mutable state, so one shared
+    /// instance cannot serve two cities: reassigning `.timeZone` per call would
+    /// corrupt every cached formatter. Keying on both makes each combination
+    /// safe to reuse.
+    private static let formatters: [FormatterKey: DateFormatter] = {
+        let zone = TimeZone.current
+        return ["yyyy-MM-dd HH:mm", "yyyy-MM-dd", "hh:mm a"]
+            .reduce(into: [:]) { result, format in
+                result[FormatterKey(format: format, zoneID: zone.identifier)] =
+                    make(format, zone: zone)
+            }
     }()
 
-    private static func makeFormatter(_ format: String) -> DateFormatter {
-        // Must not silently substitute another format: a mismatched format makes
-        // parsing fail or, worse, succeed with the wrong meaning. Build one on
-        // demand for any format that is not cached.
-        if let cached = formatters[format] { return cached }
+    private static func makeFormatter(_ format: String, zone: TimeZone) -> DateFormatter {
+        let key = FormatterKey(format: format, zoneID: zone.identifier)
+        if let cached = formatters[key] { return cached }
 
+        // Rare (a zone not seen before). Build it; caching it would need a lock
+        // for no measurable benefit.
+        return make(format, zone: zone)
+    }
+
+    private static func make(_ format: String, zone: TimeZone) -> DateFormatter {
         let formatter = DateFormatter()
+        // POSIX locale is required, otherwise a user's calendar (for example a
+        // Buddhist or Japanese locale) makes parsing fail outright.
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = .current
+        formatter.timeZone = zone
         formatter.dateFormat = format
         return formatter
+    }
+
+    private struct FormatterKey: Hashable {
+        let format: String
+        let zoneID: String
     }
 }
 
@@ -320,6 +357,14 @@ extension ForecastResponse {
         let country: String
         let lat: Double
         let lon: Double
+        /// IANA zone for the forecast, e.g. "Asia/Tokyo". Forecast timestamps
+        /// are local wall-clock times in this zone, not the device's.
+        let tzId: String?
+
+        enum CodingKeys: String, CodingKey {
+            case name, region, country, lat, lon
+            case tzId = "tz_id"
+        }
     }
 
     struct ConditionPayload: Decodable {

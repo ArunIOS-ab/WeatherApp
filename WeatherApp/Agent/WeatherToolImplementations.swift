@@ -156,7 +156,7 @@ struct GetForecastRangeTool: WeatherTool {
         let window = snapshot.daily.prefix(days)
 
         let lines = window.map { day in
-            let date = day.date.formatted(.dateTime.weekday(.wide))
+            let date = snapshot.weekday(day.date)
             let high = day.maxTempC.formatted(.number.precision(.fractionLength(0)))
             let low = day.minTempC.formatted(.number.precision(.fractionLength(0)))
             let rain = day.precipChance > 0 ? ", \(day.precipChance)% \(precipKind(day.conditionText, tempC: day.minTempC))" : ""
@@ -206,7 +206,7 @@ struct GetHourlyWindowTool: WeatherTool {
         let window = snapshot.hourly.prefix(hours)
 
         let lines = window.map { hour in
-            let time = hour.date.formatted(.dateTime.hour().minute())
+            let time = snapshot.hourMinute(hour.date)
             let rain = hour.precipChance > 0 ? ", \(hour.precipChance)% \(precipKind(hour.conditionText, tempC: hour.tempC))" : ""
             return "\(time) \(hour.tempC.formatted(.number.precision(.fractionLength(0))))°, "
                 + "\(hour.conditionText)\(rain), wind \(hour.windKph.formatted(.number.precision(.fractionLength(0)))) kph"
@@ -379,6 +379,7 @@ struct GetCalendarScheduleTool: WeatherTool {
 
         let formatter = DateFormatter()
         formatter.dateFormat = "EEE d MMM, HH:mm"
+        // Times are the user's own calendar entries, so the device zone is correct here.
 
         let lines = events.map { event in
             let start = formatter.string(from: event.startDate)

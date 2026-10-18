@@ -196,10 +196,14 @@ struct FoundationModelsSDKBackend: AgentReasoningBackend {
     static func contextBlock(_ snapshot: WeatherSnapshot) -> String {
         let current = snapshot.current
 
+        // Format in the forecast city's zone so the model reads the same
+        // wall-clock times a resident would.
         let hourFormat = DateFormatter()
         hourFormat.dateFormat = "HH:mm"
+        hourFormat.timeZone = snapshot.timeZone
         let dayFormat = DateFormatter()
         dayFormat.dateFormat = "EEE d MMM"
+        dayFormat.timeZone = snapshot.timeZone
 
         let hourly = snapshot.hourly.prefix(8).map { hour in
             "\(hourFormat.string(from: hour.date)): \(hour.tempC)°C, rain \(hour.precipChance)%, wind \(hour.windKph)kph"

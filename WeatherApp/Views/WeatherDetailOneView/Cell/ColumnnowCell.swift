@@ -7,6 +7,9 @@ import SwiftUI
 /// One hourly forecast column: time, icon, temperature.
 struct ColumnnowCell: View {
     let hour: HourlyForecast
+    /// The forecast city's zone. Required: formatting `hour.date` with the
+    /// device's zone would show the wrong time for any city abroad.
+    var timeZone: TimeZone = .current
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -61,7 +64,11 @@ struct ColumnnowCell: View {
         let interval = hour.date.timeIntervalSinceNow
         // Within 45 minutes is effectively the current hour.
         guard interval > 45 * 60 else { return StringConstants.kLblNow }
-        return hour.date.formatted(.dateTime.hour())
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = timeZone
+        formatter.dateFormat = "ha"
+        return formatter.string(from: hour.date)
     }
 
     private var tempLabel: String {

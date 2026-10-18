@@ -175,10 +175,15 @@ struct WeatherAgent: Sendable {
                     do {
                         let tool = try self.registry.tool(named: call.tool)
                         let result = try await tool.run(arguments: call.arguments)
-                        return ToolObservation(tool: call.tool, arguments: call.arguments, result: result)
+                        return ToolObservation(tool: call.tool, arguments: call.arguments,
+                                               result: result,
+                                               toolCallID: call.toolCallID,
+                                               rawArguments: call.rawArguments)
                     } catch {
                         return ToolObservation(tool: call.tool, arguments: call.arguments,
-                                               errorMessage: error.localizedDescription)
+                                               errorMessage: error.localizedDescription,
+                                               toolCallID: call.toolCallID,
+                                               rawArguments: call.rawArguments)
                     }
                 }
             }
@@ -251,6 +256,17 @@ actor WeatherAgentActor {
     }
 
     var messageList: [AgentMessage] { messages }
+
+    /// Discards the conversation.
+    ///
+    /// Both arrays must be cleared: `messages` is what the UI renders, and
+    /// `transcript` is the history fed back to the reasoning backend. Clearing
+    /// only the former leaves the next turn appending to a history the user can
+    /// no longer see.
+    func reset() {
+        messages.removeAll()
+        transcript.removeAll()
+    }
 
     func send(_ text: String, location: GeoLocation, snapshot: WeatherSnapshot?) async throws {
         let userMessage = AgentMessage(role: .user, text: text)
@@ -396,7 +412,7 @@ enum InsightGenerator {
                 kind: isSnow ? .warning : .preparation,
                 title: "\(kind.capitalized) expected \(when)",
                 detail: "Precipitation probability climbs to \(rainSoon.precipChance)% "
-                    + "around \(rainSoon.date.formatted(.dateTime.hour().minute())). "
+                    + "around \(snapshot.hourMinute(rainSoon.date)). "
                     + advice,
                 priority: 100
             ))
@@ -420,7 +436,7 @@ enum InsightGenerator {
         if current.apparentTempC < 4, let warmest = bestOutdoorHour(in: snapshot) {
             results.append(AgentInsight(
                 kind: .timing,
-                title: "Delay your trip until \(warmest.date.formatted(.dateTime.hour().minute()))",
+                title: "Delay your trip until \(snapshot.hourMinute(warmest.date))",
                 detail: "It is \(current.apparentTempC.formatted(.number.precision(.fractionLength(0))))°C "
                     + "feels-like now, improving to "
                     + "\(warmest.tempC.formatted(.number.precision(.fractionLength(0))))°C mid-day.",
@@ -454,7 +470,7 @@ enum InsightGenerator {
                 kind: .comfort,
                 title: "Great conditions for a run",
                 detail: best.map {
-                    "\($0.date.formatted(.dateTime.hour().minute())) looks best — "
+                    "\(snapshot.hourMinute($0.date)) looks best — "
                     + "\($0.tempC.formatted(.number.precision(.fractionLength(0))))°C, "
                     + "\($0.windKph.formatted(.number.precision(.fractionLength(0)))) kph wind."
                 } ?? "Light wind and a low rain chance right through the next few hours.",
