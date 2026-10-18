@@ -50,6 +50,8 @@
 		AG0070000000000000000002 /* WeatherApp/Agent/FoundationModelsAvailability.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG0070000000000000000001 /* WeatherApp/Agent/FoundationModelsAvailability.swift */; };
 		AG00A1000000000000000002 /* WeatherApp/Views/AgentView/AgentInsightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG00A1000000000000000001 /* WeatherApp/Views/AgentView/AgentInsightView.swift */; };
 		AG00C8000000000000000002 /* WeatherApp/Model/ListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG00C8000000000000000001 /* WeatherApp/Model/ListModel.swift */; };
+		AG00D1000000000000000002 /* LocationSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG00D1000000000000000001 /* LocationSearchView.swift */; };
+		AG00E1000000000000000002 /* WeatherIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = AG00E1000000000000000001 /* WeatherIcon.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -119,6 +121,8 @@
 		AG00A1000000000000000001 /* WeatherApp/Views/AgentView/AgentInsightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherApp/Views/AgentView/AgentInsightView.swift; sourceTree = SOURCE_ROOT; };
 		AG00C8000000000000000001 /* WeatherApp/Model/ListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherApp/Model/ListModel.swift; sourceTree = SOURCE_ROOT; };
 		AG00C1000000000000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "WeatherApp/Info.plist"; sourceTree = SOURCE_ROOT; };
+		AG00D1000000000000000001 /* LocationSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WeatherApp/Views/AgentView/LocationSearchView.swift"; sourceTree = SOURCE_ROOT; };
+		AG00E1000000000000000001 /* WeatherIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WeatherApp/Views/AgentView/WeatherIcon.swift"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -159,6 +163,7 @@
 		965769F22A761F7F0008180A /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				AG00D1000000000000000003 /* AgentView */,
 				AG00A1000000000000000003 /* AgentView */,
 				96576A092A7621FA0008180A /* WeatherSearchView */,
 				965769FD2A76212E0008180A /* WeatherDetailOneView */,
@@ -402,6 +407,15 @@
 			path = AgentView;
 			sourceTree = "<group>";
 		};
+		AG00D1000000000000000003 /* AgentView */ = {
+			isa = PBXGroup;
+			children = (
+				AG00E1000000000000000001 /* WeatherIcon.swift */,
+				AG00D1000000000000000001 /* LocationSearchView.swift */,
+			);
+			path = AgentView;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -538,6 +552,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AG00E1000000000000000002 /* WeatherIcon.swift in Sources */,
+				AG00D1000000000000000002 /* LocationSearchView.swift in Sources */,
 				AG00A1000000000000000002 /* WeatherApp/Views/AgentView/AgentInsightView.swift in Sources */,
 				AG0070000000000000000002 /* WeatherApp/Agent/FoundationModelsAvailability.swift in Sources */,
 				AG00C8000000000000000002 /* WeatherApp/Model/ListModel.swift in Sources */,

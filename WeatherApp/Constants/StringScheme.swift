@@ -95,5 +95,9 @@ struct StringConstants {
     static let kMsgAskAgentPlaceholder: String = "Ask about the weather"
     static let kMsgWaitingForWeather: String = "Loading weather data…"
     static let kLblLoading: String = "Loading"
+    static let kLblSearchPlaceholder: String = "Search city or airport"
+    static let kLblChangeLocation: String = "Change location"
+    static let kMsgNoPlacesFound: String = "No matching places"
+    static let kLblClear: String = "Clear"
     static let kMsgAgentIntro: String = "I can look at current conditions and the forecast, check your calendar, work out what to wear or pack, and time outdoor plans around the weather. Ask me anything about today or the week ahead."
 }

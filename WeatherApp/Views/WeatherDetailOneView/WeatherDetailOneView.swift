@@ -4,10 +4,65 @@
 //
 import SwiftUI
 
+/// Which modal this screen can present.
+///
+/// A single enum rather than two booleans: SwiftUI only honours the *last*
+/// `.sheet` attached to a view, so two separate `.sheet(isPresented:)`
+/// modifiers leave one of them permanently dead. This is the documented way to
+/// present more than one sheet from one screen.
+enum ActiveSheet: String, Identifiable {
+    case chat
+    case search
+
+    var id: String { rawValue }
+}
+
 struct WeatherDetailOneView: View {
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @State private var groupsevenText: String = ""
-    @State var isEdit: Bool = false
+
+    // MARK: - Live data bindings
+
+    /// Everything below reads from the snapshot rather than hardcoded strings,
+    /// so the whole screen re-scopes when the user picks a new location.
+
+    private var current: CurrentConditions? { viewModel.snapshot?.current }
+
+    /// Today's high/low, taken from the first daily entry. Falls back to the
+    /// current temperature before any forecast has arrived.
+    private var today: DailyForecast? { viewModel.snapshot?.daily.first }
+
+    private var currentTemp: String {
+        guard let c = current else { return "--" }
+        return "\(Int(c.tempC.rounded()))°"
+    }
+
+    private var currentFeelsLike: String {
+        guard let c = current else { return "--" }
+        return "\(Int(c.apparentTempC.rounded()))°c"
+    }
+
+    private var currentHigh: String {
+        guard let d = today else { return "--°" }
+        return "\(Int(d.maxTempC.rounded()))°c"
+    }
+
+    private var currentLow: String {
+        guard let d = today else { return "--°c" }
+        return "\(Int(d.minTempC.rounded()))°c"
+    }
+
+    private var currentCondition: String {
+        current?.conditionText ?? StringConstants.kLblLoading
+    }
+
+    /// The next 7 hours, which is what the hourly strip shows.
+    private var upcomingHours: [HourlyForecast] {
+        Array(viewModel.snapshot?.hourly.prefix(7) ?? [])
+    }
+
+    private var forecastDays: [DailyForecast] {
+        viewModel.snapshot?.daily ?? []
+    }
 
     // MARK: - Agentic layer
 
@@ -18,49 +73,51 @@ struct WeatherDetailOneView: View {
                              lat: 45.4215,
                              lon: -75.6972)
     )
-    @State private var showAgentChat = false
+    @State private var activeSheet: ActiveSheet?
     @State private var followUpQuestion: String?
 
     var body: some View {
         NavigationStack{
             VStack {
                 VStack(alignment: .leading, spacing: 0) {
-                    //MARK: - Navigation Actions UI
-                    VStack {
-                        HStack {
-                            HStack {
-                                Image("img_vector_bluegray_900")
-                                    .resizable()
-                                    .frame(width: getRelativeWidth(18.0),
-                                           height: getRelativeHeight(14.0), alignment: .center)
-                                    .scaledToFit()
-                                    .clipped()
-                                    .padding(.vertical, getRelativeHeight(5.0)).onTapGesture {
-                                        self.presentationMode.wrappedValue.dismiss()
-                                    }
-                                Spacer()
-                                if isEdit{
-                                    Image("img_vector_red_400").resizable().frame(width: getRelativeWidth(14.0),height: getRelativeHeight(16.0), alignment: .center).scaledToFit().clipped()
-                                    Text(StringConstants.kLblRemove).font(FontScheme.kAvenirRoman(size: getRelativeHeight(16.0))).fontWeight(.regular).foregroundColor(ColorConstants.Red400).minimumScaleFactor(0.5).multilineTextAlignment(.leading).frame(width: getRelativeWidth(59.0),height: getRelativeHeight(22.0), alignment: .topLeading).padding(.leading, getRelativeWidth(6.0))
-                                }else{
-                                    Text(StringConstants.kLblAdd)
-                                        .font(FontScheme.kAvenirRoman(size: getRelativeHeight(16.0)))
-                                        .fontWeight(.regular)
-                                        .foregroundColor(ColorConstants.Black900)
-                                        .minimumScaleFactor(0.5)
-                                        .multilineTextAlignment(.leading)
-                                        .frame(width: getRelativeWidth(46.0),
-                                               height: getRelativeHeight(22.0), alignment: .topLeading)
+                    //MARK: - Location header (tappable; opens location search)
+                    Button {
+                        activeSheet = .search
+                    } label: {
+                        HStack(spacing: getRelativeWidth(6.0)) {
+                            Image(systemName: "mappin.and.ellipse")
+                                .resizable()
+                                .frame(width: getRelativeWidth(13.0), height: getRelativeWidth(13.0))
+                                .scaledToFit()
+                                .foregroundColor(ColorConstants.IndigoA400)
+
+                            VStack(alignment: .leading, spacing: getRelativeHeight(2.0)) {
+                                Text(viewModel.location.name)
+                                    .font(FontScheme.kAvenirHeavy(size: getRelativeHeight(20.0)))
+                                    .foregroundColor(ColorConstants.Black900)
+                                    .lineLimit(1)
+
+                                if !viewModel.location.displayName.isEmpty {
+                                    Text(viewModel.location.displayName)
+                                        .font(FontScheme.kAvenirLight(size: getRelativeHeight(12.0)))
+                                        .foregroundColor(ColorConstants.Bluegray400)
+                                        .lineLimit(1)
                                 }
                             }
-                            .frame(width: getRelativeWidth(358.0), height: getRelativeHeight(22.0),
-                                   alignment: .leading)
+
+                            Spacer()
+
+                            Image(systemName: "magnifyingglass")
+                                .resizable()
+                                .frame(width: getRelativeWidth(15.0), height: getRelativeWidth(15.0))
+                                .scaledToFit()
+                                .foregroundColor(ColorConstants.Gray400)
                         }
-                        .frame(width: getRelativeWidth(358.0), height: getRelativeHeight(22.0),
-                               alignment: .leading)
+                        .contentShape(Rectangle())
                     }
-                    .frame(width: getRelativeWidth(361.0), height: getRelativeHeight(22.0),
-                           alignment: .leading)
+                    .buttonStyle(.plain)
+                    .frame(width: getRelativeWidth(361.0), alignment: .leading)
+                    .padding(.bottom, getRelativeHeight(6.0))
                     
                     VStack(alignment: .leading, spacing: 0) {
                         ScrollView(.vertical, showsIndicators: false) {
@@ -68,30 +125,9 @@ struct WeatherDetailOneView: View {
                                 //MARK: - Weather UI
                                 HStack {
                                     VStack(alignment: .leading, spacing: 0) {
-                                        Text(StringConstants.kLblOttawa)
-                                            .font(FontScheme
-                                                .kAvenirHeavy(size: getRelativeHeight(36.0)))
-                                            .fontWeight(.heavy)
-                                            .foregroundColor(ColorConstants.Black900)
-                                            .minimumScaleFactor(0.5)
-                                            .multilineTextAlignment(.leading)
-                                            .frame(width: getRelativeWidth(126.0),
-                                                   height: getRelativeHeight(46.0),
-                                                   alignment: .topLeading)
-                                            .padding(.trailing)
-                                        Text(StringConstants.kLblOntarioCanada)
-                                            .font(FontScheme.kAvenirBook(size: getRelativeHeight(16.0)))
-                                            .fontWeight(.regular)
-                                            .foregroundColor(ColorConstants.Black900)
-                                            .minimumScaleFactor(0.5)
-                                            .multilineTextAlignment(.leading)
-                                            .frame(width: getRelativeWidth(119.0),
-                                                   height: getRelativeHeight(18.0),
-                                                   alignment: .topLeading)
-                                            .padding(.trailing, getRelativeWidth(10.0))
                                         HStack {
                                             ZStack(alignment: .bottomLeading) {
-                                                Text(StringConstants.kLbl19)
+                                                Text(currentTemp)
                                                     .font(FontScheme
                                                         .kAvenirBlack(size: getRelativeHeight(120.0)))
                                                     .fontWeight(.black)
@@ -109,7 +145,7 @@ struct WeatherDetailOneView: View {
                                                                alignment: .center)
                                                         .scaledToFit()
                                                         .clipped()
-                                                    Text(StringConstants.kLbl20C)
+                                                    Text(currentHigh)
                                                         .font(FontScheme
                                                             .kAvenirRoman(size: getRelativeHeight(16.0)))
                                                         .fontWeight(.regular)
@@ -128,7 +164,7 @@ struct WeatherDetailOneView: View {
                                                         .scaledToFit()
                                                         .clipped()
                                                         .padding(.leading, getRelativeWidth(16.0))
-                                                    Text(StringConstants.kLbl12C)
+                                                    Text(currentLow)
                                                         .font(FontScheme
                                                             .kAvenirRoman(size: getRelativeHeight(16.0)))
                                                         .fontWeight(.regular)
@@ -172,7 +208,7 @@ struct WeatherDetailOneView: View {
                                     Spacer()
                                     //MARK: - Weather feels like UI
                                     VStack(alignment: .trailing, spacing: 0) {
-                                        Image("img_1161")
+                                        Image(systemName: current.map { WeatherIcon.symbol(for: $0.conditionText) } ?? "cloud")
                                             .resizable()
                                             .frame(width: getRelativeWidth(64.0),
                                                    height: getRelativeWidth(64.0), alignment: .center)
@@ -180,7 +216,7 @@ struct WeatherDetailOneView: View {
                                             .clipped()
                                             .padding(.leading)
                                             .padding(.leading)
-                                        Text(StringConstants.kLblFeelsLike20C)
+                                        Text("feels like \(currentFeelsLike)")
                                             .font(FontScheme
                                                 .kAvenirLight(size: getRelativeHeight(16.0)))
                                             .fontWeight(.light)
@@ -202,13 +238,13 @@ struct WeatherDetailOneView: View {
                                 //MARK: - Agent Insights (proactive recommendations)
                                 AgentInsightsSection(insights: viewModel.insights) { insight in
                                     followUpQuestion = "\(insight.title) — \(insight.detail)"
-                                    showAgentChat = true
+                                    activeSheet = .chat
                                 }
                                 .padding(.top, getRelativeHeight(22.0))
 
                                 //MARK: - Ask the Agent CTA
                                 Button {
-                                    showAgentChat = true
+                                    activeSheet = .chat
                                 } label: {
                                     HStack(spacing: getRelativeWidth(8.0)) {
                                         if viewModel.isLoading {
@@ -252,8 +288,7 @@ struct WeatherDetailOneView: View {
                                 VStack {
                                     VStack {
                                         HStack(spacing: 0) {
-                                            TextField(StringConstants.kLblPartlyCloudy,
-                                                      text: $groupsevenText)
+                                            Text(currentCondition)
                                             .font(FontScheme
                                                 .kAvenirBook(size: getRelativeHeight(16.0)))
                                             .foregroundColor(ColorConstants.Black900)
@@ -271,9 +306,9 @@ struct WeatherDetailOneView: View {
                                     HStack(spacing: 0) {
                                         ScrollView(.horizontal, showsIndicators: false) {
                                             LazyHStack {
-                                                ForEach(0 ... 6, id: \.self) { index in
+                                                ForEach(upcomingHours) { hour in
                                                     //MARK: - Hourly Forecast UI
-                                                    ColumnnowCell()
+                                                    ColumnnowCell(hour: hour)
                                                 }
                                             }
                                         }
@@ -319,8 +354,9 @@ struct WeatherDetailOneView: View {
                                     VStack(spacing: 0) {
                                         ScrollView(.vertical, showsIndicators: false) {
                                             LazyVStack {
-                                                ForEach(0 ... 4, id: \.self) { index in
-                                                    RowtodayCell()
+                                                ForEach(forecastDays, id: \.date) { day in
+                                                    RowtodayCell(day: day,
+                                                                isToday: day.id == today?.id)
                                                 }
                                             }
                                         }
@@ -341,9 +377,9 @@ struct WeatherDetailOneView: View {
                                 VStack(spacing: 0) {
                                     ScrollView(.vertical, showsIndicators: false) {
                                         LazyVStack {
-                                            ForEach(0 ... 1, id: \.self) { index in
-                                                RowdistanceCell()
-                                            }
+                                            RowdistanceCell(precipitationMM: viewModel.snapshot?.daily.first?.precipMM ?? 0,
+                                                       windKph: current?.windKph ?? 0,
+                                                       windDirection: current?.windDirection ?? "")
                                         }
                                     }
                                 }
@@ -351,40 +387,43 @@ struct WeatherDetailOneView: View {
                                 .padding(.top, getRelativeHeight(26.0))
                                 
                                 
-                                //MARK: - Alerts UI
-                                HStack {
-                                    Image("img_vector_bluegray_700_14x13")
-                                        .resizable()
-                                        .frame(width: getRelativeWidth(13.0),
-                                               height: getRelativeHeight(14.0), alignment: .center)
-                                        .scaledToFit()
-                                        .clipped()
-                                    Text(StringConstants.kLblAlerts)
-                                        .font(FontScheme.kAvenirRoman(size: getRelativeHeight(12.0)))
-                                        .fontWeight(.regular)
-                                        .foregroundColor(ColorConstants.Bluegray700)
-                                        .minimumScaleFactor(0.5)
-                                        .multilineTextAlignment(.leading)
-                                        .frame(width: getRelativeWidth(32.0),
-                                               height: getRelativeHeight(17.0), alignment: .topLeading)
-                                        .padding(.leading, getRelativeWidth(4.0))
-                                }
-                                .frame(width: getRelativeWidth(49.0), height: getRelativeHeight(17.0),
-                                       alignment: .leading)
-                                .padding(.top, getRelativeHeight(28.0))
-                                .padding(.horizontal, getRelativeWidth(8.0))
+                                // Only shown when there is something to report.
+                                if let alerts = viewModel.snapshot?.alerts, !alerts.isEmpty {
+                                    //MARK: - Alerts UI
+                                    HStack {
+                                        Image("img_vector_bluegray_700_14x13")
+                                            .resizable()
+                                            .frame(width: getRelativeWidth(13.0),
+                                                   height: getRelativeHeight(14.0), alignment: .center)
+                                            .scaledToFit()
+                                            .clipped()
+                                        Text(StringConstants.kLblAlerts)
+                                            .font(FontScheme.kAvenirRoman(size: getRelativeHeight(12.0)))
+                                            .fontWeight(.regular)
+                                            .foregroundColor(ColorConstants.Bluegray700)
+                                            .minimumScaleFactor(0.5)
+                                            .multilineTextAlignment(.leading)
+                                            .frame(width: getRelativeWidth(32.0),
+                                                   height: getRelativeHeight(17.0), alignment: .topLeading)
+                                            .padding(.leading, getRelativeWidth(4.0))
+                                    }
+                                    .frame(width: getRelativeWidth(49.0), height: getRelativeHeight(17.0),
+                                           alignment: .leading)
+                                    .padding(.top, getRelativeHeight(28.0))
+                                    .padding(.horizontal, getRelativeWidth(8.0))
                                 
-                                VStack(spacing: 0) {
-                                    ScrollView(.vertical, showsIndicators: false) {
-                                        LazyVStack {
-                                            ForEach(0 ... 1, id: \.self) { index in
-                                                Column1Cell()
+                                    VStack(spacing: 0) {
+                                        ScrollView(.vertical, showsIndicators: false) {
+                                            LazyVStack {
+                                                ForEach(viewModel.snapshot?.alerts ?? []) { alert in
+                                                    Column1Cell(alert: alert)
+                                                }
                                             }
                                         }
                                     }
+                                    .frame(width: getRelativeWidth(361.0), alignment: .leading)
+                                    .padding(.top, getRelativeHeight(6.0))
                                 }
-                                .frame(width: getRelativeWidth(361.0), alignment: .leading)
-                                .padding(.top, getRelativeHeight(6.0))
                             }
                             .frame(width: getRelativeWidth(361.0), alignment: .topLeading)
                         }
@@ -405,10 +444,15 @@ struct WeatherDetailOneView: View {
             // Pulls the latest snapshot and generates the proactive insights.
             await viewModel.load()
         }
-        .sheet(isPresented: $showAgentChat) {
-            AgentChatView(viewModel: viewModel,
-                          initialQuestion: followUpQuestion)
-                .presentationDetents([.large])
+        .sheet(item: $activeSheet) { sheet in
+            switch sheet {
+            case .chat:
+                AgentChatView(viewModel: viewModel,
+                              initialQuestion: followUpQuestion)
+                    .presentationDetents([.large])
+            case .search:
+                LocationSearchView(viewModel: viewModel)
+            }
         }
         .alert(
             StringConstants.kLblWeatherAgent,

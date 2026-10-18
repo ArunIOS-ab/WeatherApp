@@ -4,68 +4,75 @@
 //
 import SwiftUI
 
+/// One weather alert. Shows the headline, severity and a trimmed description.
 struct Column1Cell: View {
+    let alert: WeatherAlert
+
     var body: some View {
-        VStack {
-            VStack(alignment: .trailing, spacing: 0) {
-                Text(StringConstants.kLblThunderstorm)
-                    .font(FontScheme.kAvenirRoman(size: getRelativeHeight(12.0)))
-                    .fontWeight(.regular)
-                    .foregroundColor(ColorConstants.WhiteA700)
-                    .minimumScaleFactor(0.5)
-                    .multilineTextAlignment(.center)
-                    .frame(width: getRelativeWidth(91.0), height: getRelativeHeight(23.0),
-                           alignment: .center)
-                    .background(ColorConstants.Yellow900)
-                    .padding(.leading)
-                    .padding(.leading)
-                Text(StringConstants.kMsgEnvironmentCan)
-                    .font(FontScheme.kAvenirHeavy(size: getRelativeHeight(16.0)))
-                    .fontWeight(.heavy)
-                    .foregroundColor(ColorConstants.Black900)
-                    .minimumScaleFactor(0.5)
-                    .multilineTextAlignment(.leading)
-                    .frame(width: getRelativeWidth(154.0), height: getRelativeHeight(22.0),
-                           alignment: .leading)
-                    .padding(.trailing, getRelativeWidth(187.0))
-                Text(StringConstants.kMsg21Jul20238)
-                    .font(FontScheme.kAvenirRoman(size: getRelativeHeight(12.0)))
-                    .fontWeight(.regular)
-                    .foregroundColor(ColorConstants.Bluegray400)
-                    .minimumScaleFactor(0.5)
-                    .multilineTextAlignment(.leading)
-                    .frame(width: getRelativeWidth(238.0), height: getRelativeHeight(17.0),
-                           alignment: .leading)
-                    .padding(.top, getRelativeHeight(4.0))
-                    .padding(.trailing, getRelativeWidth(103.0))
-                Text(StringConstants.kMsgConditionsAre)
-                    .font(FontScheme.kAvenirRoman(size: getRelativeHeight(16.0)))
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: getRelativeWidth(6.0)) {
+                Image(systemName: iconName)
+                    .resizable()
+                    .frame(width: getRelativeWidth(13.0), height: getRelativeWidth(13.0))
+                    .scaledToFit()
+                    .foregroundColor(tint)
+
+                Text(alert.headline)
+                    .font(FontScheme.kAvenirRoman(size: getRelativeHeight(13.0)))
                     .fontWeight(.regular)
                     .foregroundColor(ColorConstants.Black900)
-                    .minimumScaleFactor(0.5)
+                    .lineLimit(2)
                     .multilineTextAlignment(.leading)
-                    .frame(width: getRelativeWidth(336.0), height: getRelativeHeight(483.0),
-                           alignment: .leading)
-                    .padding(.top, getRelativeHeight(13.0))
-                    .padding(.trailing, getRelativeWidth(4.0))
+
+                Spacer(minLength: 0)
+
+                Text(alert.severity.rawValue.capitalized)
+                    .font(FontScheme.kAvenirMedium(size: getRelativeHeight(10.0)))
+                    .foregroundColor(tint)
             }
-            .frame(width: getRelativeWidth(341.0), height: getRelativeHeight(563.0),
-                   alignment: .leading)
-            .background(RoundedCorners(topLeft: 4.0, topRight: 4.0, bottomLeft: 4.0,
-                                       bottomRight: 4.0).fill(Color.clear))
-            .padding(.vertical, getRelativeHeight(10.0))
             .padding(.horizontal, getRelativeWidth(10.0))
+            .padding(.top, getRelativeHeight(10.0))
+
+            Text(alert.detail)
+                .font(FontScheme.kAvenirLight(size: getRelativeHeight(11.0)))
+                .foregroundColor(ColorConstants.Bluegray700)
+                .lineLimit(3)
+                .multilineTextAlignment(.leading)
+                .padding(.horizontal, getRelativeWidth(10.0))
+                .padding(.top, getRelativeHeight(5.0))
+                .padding(.bottom, getRelativeHeight(10.0))
         }
-        .frame(width: getRelativeWidth(359.0), alignment: .leading)
-        .background(RoundedCorners(topLeft: 8.0, topRight: 8.0, bottomLeft: 8.0, bottomRight: 8.0)
-            .fill(ColorConstants.Gray102))
-        
+        .frame(width: getRelativeWidth(341.0), alignment: .leading)
+        .background(RoundedCorners(topLeft: 8.0, topRight: 8.0, bottomLeft: 8.0,
+                                   bottomRight: 8.0)
+            .fill(ColorConstants.Gray101))
+    }
+
+    /// Escalating icon and colour with severity, so a moderate alert does not
+    /// look identical to an extreme one.
+    private var iconName: String {
+        switch alert.severity {
+        case .minor:     return "cloud"
+        case .moderate:  return "exclamationmark.triangle"
+        case .severe:    return "exclamationmark.triangle.fill"
+        case .extreme:   return "exclamationmark.octagon.fill"
+        }
+    }
+
+    private var tint: Color {
+        switch alert.severity {
+        case .minor:     return ColorConstants.Bluegray700
+        case .moderate:  return ColorConstants.IndigoA400
+        case .severe:    return ColorConstants.Red400
+        case .extreme:   return ColorConstants.Red400
+        }
     }
 }
 
-/* struct Column1Cell_Previews: PreviewProvider {
-
- static var previews: some View {
-             Column1Cell()
- }
- } */
+struct Column1Cell_Previews: PreviewProvider {
+    static var previews: some View {
+        Column1Cell(alert: WeatherAlert(headline: "Rainfall warning",
+                                        detail: "Heavy rain expected over the next 24 hours.",
+                                        severity: .moderate))
+    }
+}
